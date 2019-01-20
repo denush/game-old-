@@ -8,7 +8,7 @@ function entities_module() {
         all: []
     };
 
-    entities.init = function(storage) {
+    entities.init = function(storage, viewport) {
 
         this.hero = new Unit(storage.hero.x,
                             storage.hero.y,
@@ -44,6 +44,9 @@ function entities_module() {
         });
 
         this.all = this.units.concat(this.subjects);
+        this.all.forEach(function(entity) {
+            entity.initViewport(viewport);
+        });
     }
     
     entities.update = function() {

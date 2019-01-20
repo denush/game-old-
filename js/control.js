@@ -15,13 +15,7 @@ function control_module() {
         
     }
     
-    let control = {
-        
-        mouseClick: {
-            x: 0,
-            y: 0
-        },
-    };
+    let control = {};
 
     //  инициализация управления
     control.init = function(unit, entities, viewport) {
@@ -34,8 +28,6 @@ function control_module() {
             if (e.keyCode === KEY_S) unit.moveDown = true;
             if (e.keyCode === KEY_A) unit.moveLeft = true;
             if (e.keyCode === KEY_D) unit.moveRight = true;
-
-            //console.log(e.keyCode);
         });
 
         document.addEventListener('keyup', function(e) {
@@ -46,34 +38,29 @@ function control_module() {
             if (e.keyCode === KEY_D) unit.moveRight = false;
         });
 
+        
+        canvas.addEventListener('mousemove', function(e) {
+            
+            unit.direction = MOUSE_SCREEN_X > unit.screenX ? 'right' : 'left';   
+        });
 
         function funcOnClick(e) {
-            e.preventDefault();
+        
+            let entity = entities.entityOnCoords(MOUSE_WORLD_X, MOUSE_WORLD_Y);
 
-            let screenX = e.clientX - canvas.offsetLeft - canvas.clientLeft;
-            let screenY = e.clientY - canvas.offsetTop - canvas.clientTop;
-            let worldX = screenX + viewport.getCoords().x;
-            let worldY = screenY + viewport.getCoords().y;
-
-            let entity = entities.entityOnCoords(worldX, worldY);
-
-            if (entity) {
-                entity.clicked(e.which);
-                let dist = tools.getDistance(unit, entity);
+            switch(e.which) {
+                case 1:
+                    unit.action1(entity);
+                    break;
+                case 3  :
+                    unit.action2(entity);
+                    break;
             }
         }
 
         canvas.addEventListener('click', funcOnClick);
         canvas.addEventListener('contextmenu', funcOnClick);
-
-        canvas.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-        });
-        document.addEventListener('dblclick', function(e) {
-            e.preventDefault();
-        });
     }
     
     return control;
-
 }

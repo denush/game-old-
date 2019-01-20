@@ -21,6 +21,8 @@ function Unit_module() {
         this.moveLeft = false;
         this.moveRight = false;
 
+        this.isMoving = null;   //  движется ли юнит в данный момент
+
         this.prevState = null;    //  cостояние юнита в предыдущем кадре
         this.state = null;        //  состояние юнита в текущем кадре -- состояние обновляется в update()
         
@@ -73,20 +75,22 @@ function Unit_module() {
         }
         if (this.moveLeft) {
             this.x -= this.speed;
-            this.direction = 'left'; // если юнит движется влево, то взгляд направлен туда же
+            //this.direction = 'left'; // если юнит движется влево, то взгляд направлен туда же
         }
         if (this.moveRight) {
             this.x += this.speed;
-            this.direction = 'right';
+            //this.direction = 'right';
         }
         
         //  если юнит совершает движение, запоминаем это (isMoving)
         if (this.moveUp || this.moveDown ||
             this.moveLeft || this.moveRight) {
+            this.isMoving = true;
             this.prevState = this.state;
             this.state = 'walk';   
         }
         else {
+            this.isMoving = false;
             this.prevState = this.state;
             this.state = 'stay';
         }
@@ -97,6 +101,7 @@ function Unit_module() {
         let x = this.x - deltaX;
         let y = this.y - deltaY;
 
+        //  если изменилось состояние юнита
         if (this.state !== this.prevState) {
             this.animationFrame = 0;
             this.frameCounter = 0;
@@ -166,14 +171,39 @@ function Unit_module() {
     }
     
     //  EVENTS
-    Unit.prototype.clicked = function(btn) {
-        if (btn === 1)
-            getTalked();
-        else if (btn === 3)
-            getInspected(this.unitId);
+    Unit.prototype.action1 = function(entity) {
+        if (entity) {
+            entity.getActioned('interact');
+            let dist = tools.getDistance(this, entity);
+        }
     }
 
-    function getAttacked() {
+    Unit.prototype.action2 = function(entity) {
+        if (entity) {
+            entity.getActioned('inspect');
+            let dist = tools.getDistance(this, entity);
+        }
+    }
+
+    Unit.prototype.getActioned = function(action) {
+
+        console.log('world x: ' + this.x);
+        console.log('world y: ' + this.y);
+        console.log('screen x: ' + this.screenX);
+        console.log('screen x: ' + this.screenY);
+
+        switch(action) {
+            case 'interact':
+                getInteracted();
+                break;
+            case 'inspect':
+                getInspected(this.unitId);
+                break;
+
+        }
+    }
+
+    function getAttacked(entity) {
         
     }
     
@@ -181,12 +211,12 @@ function Unit_module() {
         
     }
     
-    function getTalked() {
+    function getInteracted() {
         console.log('HELLO!!!');
     }
     
     function getInspected(id) {
-        console.log('id: ' + id);
+        
     }
     
     //  END

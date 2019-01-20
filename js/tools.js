@@ -1,7 +1,7 @@
 function tools_module() {
 
     'use strict';
-    
+
     function getDistance(unit1, unit2) {
 
         let distance;
@@ -25,5 +25,4 @@ function tools_module() {
     return {
         getDistance: getDistance,
     };
-    
 }

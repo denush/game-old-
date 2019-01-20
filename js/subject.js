@@ -26,8 +26,12 @@ function Subject_module() {
     }
     
     //  EVENTS
-    Subject.prototype.clicked = function() {
-        console.log('id: ' + this.subjectId);
+    Subject.prototype.getActioned = function(action) {
+        switch(action) {
+            case 'interact':
+                console.log('IMAHOUSE');
+                break;
+        }
     }
     
     return Subject;

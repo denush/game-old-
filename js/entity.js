@@ -4,6 +4,8 @@ function Entity_module() {
     
     function Entity(x, y, w, h, w2, s) {
 
+        this.viewport = null;
+
         this.x = x;
         this.y = y;
         this.width = w;
@@ -34,10 +36,20 @@ function Entity_module() {
         bottom2: {
             get: function() { return this.y + this.height - this.width2; },
             set: function(n) { this.y = n + this.width2 - this.height; }
+        },
+        screenX: {
+            get: function() { return this.x - viewport.x; }
+        },
+        screenY: {
+            get: function() { return this.y - viewport.y; }
         }
     });
 
     //  ENTITY METHODS
+    Entity.prototype.initViewport = function(viewport) {
+        this.viewport = viewport;
+    }
+
     Entity.prototype.update = function() {
 
     }
@@ -56,5 +68,4 @@ function Entity_module() {
     
     //  END
     return Entity;
-    
 }

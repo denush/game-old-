@@ -17,7 +17,7 @@ auxiliary();
 ///////
 
 files.uploadImages(storage);
-entities.init(storage);
+entities.init(storage, viewport);
 control.init(entities.hero, entities, viewport);
 viewport.init(entities.hero, entities, map);
 
