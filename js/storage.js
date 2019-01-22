@@ -38,7 +38,12 @@ function storage_module() {
         },
         units: [
             {
-                x: 100,
+                x: 40,
+                y: 10,
+                type: 'human'
+            },
+            {
+                x: 90,
                 y: 10,
                 type: 'human'
             },

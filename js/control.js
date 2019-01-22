@@ -11,8 +11,7 @@ function control_module() {
         87: 'moveUp',
         83: 'moveDown',
         65: 'moveLeft',
-        68: 'moveRight'
-        
+        68: 'moveRight'  
     }
     
     let control = {};
@@ -41,16 +40,18 @@ function control_module() {
         
         canvas.addEventListener('mousemove', function(e) {
             
-            unit.direction = MOUSE_SCREEN_X > unit.screenX ? 'right' : 'left';   
+            unit.direction = MOUSE_SCREEN_X > unit.screenX + unit.width / 2 ? 'right' : 'left';   
         });
 
         function funcOnClick(e) {
         
             let entity = entities.entityOnCoords(MOUSE_WORLD_X, MOUSE_WORLD_Y);
 
+            //if (entity) console.log('distance: ' + tools.getDistance(unit, entity));
+            
             switch(e.which) {
                 case 1:
-                    unit.action1(entity);
+                    unit.doAction('attack', unit, entities.units, MOUSE_WORLD_X, MOUSE_WORLD_Y);
                     break;
                 case 3  :
                     unit.action2(entity);

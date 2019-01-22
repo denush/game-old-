@@ -37,6 +37,9 @@ function Entity_module() {
             get: function() { return this.y + this.height - this.width2; },
             set: function(n) { this.y = n + this.width2 - this.height; }
         },
+        middleX: {
+            get: function() { return this.x + this.width / 2; }
+        },
         screenX: {
             get: function() { return this.x - viewport.x; }
         },

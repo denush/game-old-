@@ -33,6 +33,13 @@ function Unit_module() {
         this.frameLength = 10;          // длительность одного кадра анимации
         
         this.direction = 'right';   //  направление взгляда
+        
+        this.stats = {
+            strength: 20,
+        }
+        
+        this.fullHP = 200;
+        this.currentHP = this.fullHP;
     }
 
     Unit.prototype = Object.create(Entity.prototype);
@@ -170,41 +177,120 @@ function Unit_module() {
         }
     }
     
-    //  EVENTS
-    Unit.prototype.action1 = function(entity) {
-        if (entity) {
-            entity.getActioned('interact');
-            let dist = tools.getDistance(this, entity);
-        }
+    //  ACTIONS
+    let actionList = {
+        attack: attack,
     }
-
-    Unit.prototype.action2 = function(entity) {
-        if (entity) {
-            entity.getActioned('inspect');
-            let dist = tools.getDistance(this, entity);
-        }
+    
+    Unit.prototype.doAction = function(action) {
+        let unit = this;
+        actionList[action].apply(null, arguments);  //  вызываем необходимое действие и передаем все аргументы
     }
+    
 
-    Unit.prototype.getActioned = function(action) {
-
-        console.log('world x: ' + this.x);
-        console.log('world y: ' + this.y);
-        console.log('screen x: ' + this.screenX);
-        console.log('screen x: ' + this.screenY);
-
-        switch(action) {
-            case 'interact':
-                getInteracted();
-                break;
-            case 'inspect':
-                getInspected(this.unitId);
-                break;
-
-        }
-    }
-
-    function getAttacked(entity) {
+    //  действие - атака
+    function attack(action, unit, entities, mouseX, mouseY) {
         
+        //  радиус поражения удара -- тестовое решение
+        let weaponRange = 0; //  TEST
+        let armRange = 40; //  TEST
+        let effectiveRange = weaponRange + armRange;    //  TEST
+        
+        //  определение, в какой сектор вокруг персонажа наносится удар
+        let sector = 0;
+        if (mouseY >= unit.top && mouseY <= unit.bottom) {
+            sector = mouseX < unit.middleX ? 4 : 5;     //  секторы перед персонажем строго по горизонтали
+        }
+        else if (mouseX >= unit.left && mouseX <= unit.right) {
+            sector = mouseY < unit.top ? 2 : 7;         //  секторы строго по вертикали
+        }
+        else if (mouseX < unit.left) {
+            sector = mouseY < unit.top ? 1 : 6;         //  секторы слева от персонажа по диагонали
+        }
+        else if (mouseX > unit.right) {
+            sector = mouseY < unit.top ? 3 : 8;         //  секторы справа по диагонали
+        }
+        //console.log(sector);
+        //  для каждого юнита, который находится в радиусе поражения, 
+        entities.forEach(function(entity) {
+            if (tools.getDistance(unit, entity) <= effectiveRange) {    //  смотрим, находится ли он в секторе удара
+                
+                let presenceFlag = false;
+                //  в зависимости от сектора удара смотрим, находится ли цель в нем
+                //  и если находится, то устанавливаем флаг presenceFlag
+                switch(sector) {
+                    case 1:
+                        if (entity.bottom <= unit.bottom &&
+                            entity.middleX <= unit.middleX)
+                            presenceFlag = true;
+                        break;    
+                    case 2:
+                        if (entity.right >= unit.left && entity.left <= unit.right &&
+                            entity.bottom <= unit.bottom)
+                            presenceFlag = true;  
+                        break;
+                    case 3:
+                        if (entity.bottom <= unit.bottom &&
+                            entity.middleX >= unit.middleX)
+                            presenceFlag = true;
+                        break;
+                    case 4:
+                        if (entity.bottom >= unit.bottom - effectiveRange &&
+                            entity.bottom <= unit.bottom + effectiveRange &&
+                            entity.middleX <= unit.middleX)
+                            presenceFlag = true;
+                        break;
+                    case 5:
+                        if (entity.bottom >= unit.bottom - effectiveRange &&
+                            entity.bottom <= unit.bottom + effectiveRange &&
+                            entity.middleX >= unit.middleX)
+                            presenceFlag = true;
+                        break;
+                    case 6:
+                        if (entity.bottom >= unit.bottom &&
+                            entity.middleX <= unit.middleX)
+                            presenceFlag = true;
+                        break;
+                    case 7:
+                        if (entity.right >= unit.left && entity.left <= unit.right &&
+                            entity.bottom >= unit.bottom)
+                            presenceFlag = true;
+                        break;
+                    case 8:
+                        if (entity.bottom >= unit.bottom &&
+                            entity.middleX >= unit.middleX)
+                            presenceFlag = true;
+                        break;
+                }
+                
+                //  если юнит действительно находтся в секторе удара,
+                //  вызываем у пораженного юнита соотвествующее событие
+                if (presenceFlag) {
+                    entity.popEvent(action, entity, unit.stats.strength);    
+                }
+            }
+        });
+    }
+    
+    //  EVENTS
+    let eventList = {
+        attack: getAttacked,
+        inspect: getInspected,
+    }
+    
+    Unit.prototype.popEvent = function(action) {
+        eventList[action].apply(null, arguments);
+    }
+
+    function getAttacked(action, unit, power) {
+        
+        unit.currentHP -= power;
+        
+        console.log('==================');
+        console.log('unit id: ' + unit.unitId);
+        console.log('HIT for ' + power);
+        console.log('current HP: ' + unit.currentHP);
+        console.log('==================');
     }
     
     function getKicked() {

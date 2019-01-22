@@ -19,7 +19,7 @@ function entities_module() {
                             storage.hero.type,
                             9999);
 
-        this.units.push(this.hero);
+        //this.units.push(this.hero);
 
         storage.units.forEach(function(unit, i) {
             entities.units.push(new Unit(unit.x,
@@ -43,7 +43,8 @@ function entities_module() {
                                         i));
         });
 
-        this.all = this.units.concat(this.subjects);
+        this.all.push(this.hero);
+        this.all = this.all.concat(this.units, this.subjects);
         this.all.forEach(function(entity) {
             entity.initViewport(viewport);
         });
@@ -53,8 +54,17 @@ function entities_module() {
         this.all.forEach(function(unit) {
             unit.update();
         });
+        
+        //  проверяем коллизии для игрока
+        let hero = this.hero;
+        this.subjects.forEach(function(subject) {
+            if (subject.isSolid) {
+                hero.resolveCollisions(subject);
+            } 
+        });
+        
+        //  проверяем коллизии для других юнитов
         this.units.forEach(function(unit) {
-
             entities.subjects.forEach(function(subject) {
                 if (subject.isSolid)
                     unit.resolveCollisions(subject);
