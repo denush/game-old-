@@ -3,6 +3,15 @@
 let canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
 
+canvas.width = document.body.clientWidth * 0.9;
+
+window.addEventListener('resize', function() {
+    canvas.width = document.body.clientWidth * 0.9;
+});
+
+
+//canvas.width = document.body.clientWidth;
+console.dir(document.body);
 //  глобальные переменные координат мыши
 let MOUSE_SCREEN_X = null;
 let MOUSE_SCREEN_Y = null;
@@ -12,17 +21,11 @@ let MOUSE_WORLD_Y = null;
 
 //  устанавлием глобальные переменные координат мыши
 canvas.addEventListener('mousemove', function(e) {
-    let screenX = e.clientX - canvas.offsetLeft - canvas.clientLeft;
-    let screenY = e.clientY - canvas.offsetTop - canvas.clientTop;
+
+    MOUSE_SCREEN_X = e.clientX - canvas.offsetLeft - canvas.clientLeft;
+    MOUSE_SCREEN_Y = e.clientY - canvas.offsetTop - canvas.clientTop;
     
-    let worldX = screenX + viewport.x;
-    let worldY = screenY + viewport.y;
-        
-    MOUSE_SCREEN_X = screenX;
-    MOUSE_SCREEN_Y = screenY;
     
-    MOUSE_WORLD_X = worldX;
-    MOUSE_WORLD_Y = worldY;
 });
 
 //  отменяем действия браузера по умолчанию при работе с мышью

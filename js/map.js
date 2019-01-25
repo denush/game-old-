@@ -18,11 +18,11 @@ function map_module() {
         pps: PIXEL_PER_SQUARE,
     }
 
-    map.draw = function(deltaX, deltaY, files) {
+    map.draw = function(deltaX, deltaY) {
         for (let i = 0; i < this.matrix.length; ++i) {
             for (let j = 0; j < this.matrix.length; ++j) {
                 
-                    let img = files.mapImages[ this.matrix[i][j] ];
+                    let img = g_files.mapImages[ this.matrix[i][j] ];
                     let x = i * this.pps - deltaX;
                     let y = j * this.pps - deltaY;
                     ctx.drawImage(img, x, y, this.pps, this.pps);

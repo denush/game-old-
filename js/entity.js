@@ -4,8 +4,6 @@ function Entity_module() {
     
     function Entity(x, y, w, h, w2, s) {
 
-        this.viewport = null;
-
         this.x = x;
         this.y = y;
         this.width = w;
@@ -41,17 +39,14 @@ function Entity_module() {
             get: function() { return this.x + this.width / 2; }
         },
         screenX: {
-            get: function() { return this.x - viewport.x; }
+            get: function() { return this.x - g_viewport.x; }
         },
         screenY: {
-            get: function() { return this.y - viewport.y; }
+            get: function() { return this.y - g_viewport.y; }
         }
     });
 
     //  ENTITY METHODS
-    Entity.prototype.initViewport = function(viewport) {
-        this.viewport = viewport;
-    }
 
     Entity.prototype.update = function() {
 

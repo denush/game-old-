@@ -7,9 +7,9 @@ body {
 }
 
 #canvas {
-    border: 8px solid black;
+/*    border: 8px solid black;*/
     box-sizing: content-box;
-    margin-left: 200px;
+    margin-left: 5%;
     margin-top: 60px;
 }
 

@@ -4,10 +4,6 @@ function storage_module() {
         hero: {
             x: 10,
             y: 10,
-            width: 50,
-            height: 80,
-            width2: 10,
-            solid: false,
             type: 'human'
         },
         unitTypes: {
@@ -17,8 +13,18 @@ function storage_module() {
                 width2: 10,
                 solid: false,
                 states: {
-                    stay: 1,
-                    walk: 6
+                    stay: {
+                        numberOfFrames: 1,
+                        repeat: true
+                    },
+                    walk: {
+                        numberOfFrames: 6,
+                        repeat: true
+                    },
+                    attack: {
+                        numberOfFrames: 1,
+                        repeat: false
+                    }
                 }
             },
         },
@@ -39,11 +45,6 @@ function storage_module() {
         units: [
             {
                 x: 40,
-                y: 10,
-                type: 'human'
-            },
-            {
-                x: 90,
                 y: 10,
                 type: 'human'
             },

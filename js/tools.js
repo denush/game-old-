@@ -27,7 +27,14 @@ function tools_module() {
         return distance;
     }
 
+    function getEntities(unit) {
+        
+        return entities.units;
+        
+    }
+    
     return {
         getDistance: getDistance,
+        getEntities: getEntities,
     };
 }

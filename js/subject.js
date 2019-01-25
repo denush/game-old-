@@ -16,11 +16,11 @@ function Subject_module() {
     Subject.prototype.update = function() {
     }
 
-    Subject.prototype.draw = function(deltaX, deltaY, files) {
+    Subject.prototype.draw = function(deltaX, deltaY) {
         let x = this.x - deltaX;
         let y = this.y - deltaY;
         
-        let img = files.subjectImages[this.type];
+        let img = g_files.subjectImages[this.type];
         
         ctx.drawImage(img, x, y, this.width, this.height);
     }

@@ -8,39 +8,42 @@ function files_module() {
         mapImages: [],
     };
     
-    files.uploadImages = function(storage) {
+    files.downloadImages = function() {        
         //  для каждого типа юнита  
-        for (let type in storage.unitTypes) { 
+        for (let type in g_storage.unitTypes) { 
             //  создаем в объекте files.unitImages новый объект
             files.unitImages[type] = {};
-            //  также для каждого возможного направления юнита
-            [ 'left', 'right' ].forEach(function(side) {
-                //  нужно создать свой объект внутри данного типа юнита
-                files.unitImages[type][side] = {};
-                //  далее также для каждого возможного состояния юнита
-                for (let state in storage.unitTypes[type].states) {
-                    //  необходимо создать массив, в котором будут хранится изображения 
-                    files.unitImages[type][side][state] = [];   // для анимации данного состояния
+            //  далее также для каждого возможного состояния юнита
+            for (let state in g_storage.unitTypes[type].states) {
+                //  нужно создать объект данного состояния юнита
+                files.unitImages[type][state] = {};
+                files.unitImages[type][state].numberOfFrames = g_storage.unitTypes[type].states[state].numberOfFrames;
+                files.unitImages[type][state].repeat = g_storage.unitTypes[type].states[state].repeat;
+                //  также для каждого возможного направления юнита
+                [ 'left', 'right' ].forEach(function(side) {
+                    //  мы создаем массив, в котором будут хранится изображения данного состояния для данного направления
+                    files.unitImages[type][state][side] = [];
                     //  проходим по всем кадрам состояния и сохраняем изображения в массив
-                    for (let i = 0; i < storage.unitTypes[type].states[state]; ++i) {
+                    for (let i = 0; i < g_storage.unitTypes[type].states[state].numberOfFrames; ++i) {
                         
-                        let path = `img/units/${type}/${side}/${state}/${i}.png`;
+                        let path = `img/units/${type}/${state}/${side}/${i}.png`;
                         let img = document.createElement('img');
                         img.src = path;
-                        files.unitImages[type][side][state].push(img);
+                        
+                        files.unitImages[type][state][side].push(img);
                     }
-                }
-            });
+                });
+            }
         }
         
-        for (let type in storage.subjectTypes) {
+        for (let type in g_storage.subjectTypes) {
             let path = 'img/subjects/' + type + '.png'
             let img = document.createElement('img');
             img.src = path;
             this.subjectImages[type] = img;
         }
 
-        storage.map.forEach(function(chunk) {
+        g_storage.map.forEach(function(chunk) {
             let path = 'img/map/' + chunk + '.png';
             let img = document.createElement('img');
             img.src = path;
@@ -48,5 +51,6 @@ function files_module() {
         });
     }
     
+    console.log(files);
     return files;
 }

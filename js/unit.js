@@ -20,11 +20,17 @@ function Unit_module() {
         this.moveDown = false;
         this.moveLeft = false;
         this.moveRight = false;
+        
+//        this.moveUpLeft = false;
+//        this.moveUpRight = false;   
+//        this.moveDownLeft = false;
+//        this.moveDownRight = false;
 
         this.isMoving = null;   //  движется ли юнит в данный момент
 
         this.prevState = null;    //  cостояние юнита в предыдущем кадре
         this.state = null;        //  состояние юнита в текущем кадре -- состояние обновляется в update()
+        this.stateLength = null   //  длительность состояния (в кадрах)
         
         //  св-ва для подсчета кадров анимации
         this.animationFrame = 0;        // номер текущего кадра анимации
@@ -32,7 +38,7 @@ function Unit_module() {
         this.frameCounter = 0;          // счетчик для установки длительности каждого кадра анимации 
         this.frameLength = 10;          // длительность одного кадра анимации
         
-        this.direction = 'right';   //  направление взгляда
+        this.direction = null;   //  направление взгляда
         
         this.stats = {
             strength: 20,
@@ -40,6 +46,23 @@ function Unit_module() {
         
         this.fullHP = 200;
         this.currentHP = this.fullHP;
+        
+        
+        //*************************//
+        //*******   TEST    *******//
+        //*************************//
+        
+        this.weapon =  {
+            range: 50,
+            damage: 30,
+            frames: 1
+        }
+        
+        this.isAttacking = false;
+        this.statenEnd = false;
+        
+        this.lookX = null;
+        this.lookY = null;
     }
 
     Unit.prototype = Object.create(Entity.prototype);
@@ -69,42 +92,89 @@ function Unit_module() {
         
         //Entity.prototype.update.call(this);
 
+        //  устанавливаем сторону, в которую направлен персонаж
+        this.direction = this.lookX < this.middleX ? 'left' : 'right';
+        
         //  сохраняем в каждом кадре значения координат предыдущего кадра
         this.prevX = this.x;
         this.prevY = this.y;
 
         //  изменяем координаты для эффекта движения юнита
-        if (this.moveUp) {
-            this.y -= this.speed;
-        }
-        if (this.moveDown) {
-            this.y += this.speed;
-        }
-        if (this.moveLeft) {
+        if (this.moveUp && this.moveLeft) {
             this.x -= this.speed;
-            //this.direction = 'left'; // если юнит движется влево, то взгляд направлен туда же
-        }
-        if (this.moveRight) {
-            this.x += this.speed;
-            //this.direction = 'right';
-        }
-        
-        //  если юнит совершает движение, запоминаем это (isMoving)
-        if (this.moveUp || this.moveDown ||
-            this.moveLeft || this.moveRight) {
+            this.y -= this.speed;
             this.isMoving = true;
-            this.prevState = this.state;
-            this.state = 'walk';   
+        }
+        else if (this.moveUp && this.moveRight) {
+            this.x += this.speed;
+            this.y -= this.speed;
+            this.isMoving = true;
+        }
+        else if (this.moveDown && this.moveLeft) {
+            this.x -= this.speed;
+            this.y += this.speed;
+            this.isMoving = true;
+        }
+        else if (this.moveDown && this.moveRight) {
+            this.x += this.speed;
+            this.y += this.speed;
+            this.isMoving = true;
+        }     
+        else if (this.moveUp) {
+            this.y -= this.speed;
+            this.isMoving = true;
+        }
+        else if (this.moveDown) {
+            this.y += this.speed;
+            this.isMoving = true;
+        }
+        else if (this.moveLeft) {
+            this.x -= this.speed;
+            this.isMoving = true;
+        }
+        else if (this.moveRight) {
+            this.x += this.speed;
+            this.isMoving = true;
         }
         else {
             this.isMoving = false;
-            this.prevState = this.state;
+        }
+        
+        //  STATES OF THE UNIT
+        this.prevState = this.state;
+        
+        if (this.stateEnd) {
+            
+            switch(this.prevState) {
+                case 'attack':
+                    
+                    this.isAttacking = false;
+                    this.stateEnd = false;
+                    this.state = null;
+                    
+                    this.doAction('attack');
+                    
+                    break;
+            }
+        }
+        
+        if (this.isAttacking) {
+            this.state = 'attack';
+        }
+        else if (this.isMoving) {
+            //this.isMoving = true;           //  если юнит совершает движение, запоминаем это (isMoving)
+            this.state = 'walk';
+        }
+        else {
+            //this.isMoving = false; 
             this.state = 'stay';
         }
+        this.stateLengh = g_storage.unitTypes[this.type].states[this.state].numberOfFrames;
     }
 
     //  DRAW
-    Unit.prototype.draw = function(deltaX, deltaY, files) {
+    Unit.prototype.draw = function(deltaX, deltaY) {
+        //  устанавливаем координта для отрисовки в зависимости от смещения вьюпорта
         let x = this.x - deltaX;
         let y = this.y - deltaY;
 
@@ -112,20 +182,28 @@ function Unit_module() {
         if (this.state !== this.prevState) {
             this.animationFrame = 0;
             this.frameCounter = 0;
-            this.animationLength = files.unitImages[this.type][this.direction][this.state].length;
+            this.animationLength = g_files.unitImages[this.type][this.state].numberOfFrames;
         }
         
         // картинка, которую надо будет отрисовать в этом кадре
-        let img = files.unitImages[this.type][this.direction][this.state][this.animationFrame];
+        let img = g_files.unitImages[this.type][this.state][this.direction][this.animationFrame];
 
-        this.frameCounter++;
-        if (this.frameCounter % this.frameLength === 0) {
-            this.frameCounter = 0;
-            this.animationFrame++;
-            if (this.animationFrame >= this.animationLength)
-                this.animationFrame = 0;
+        this.frameCounter++;    //  увеличим длительность текущего кадра
+        if (this.frameCounter % this.frameLength === 0) {   //  если кадр длится больше установленного времени
+            this.frameCounter = 0;                          //  сбрасываем длительность в ноль
+            this.animationFrame++;                          //  и переходим к следующему кадру анимации
         }
 
+        if (this.animationFrame >= this.animationLength) {  //  если кадры в текущей анимации закончились
+                
+            //  смотрим, имеет ли состояние свойство повторяться
+            if (g_files.unitImages[this.type][this.state].repeat) {
+                this.animationFrame = 0;    //  если повторяется, начинаем анимацию сначала
+            }
+            else {
+                this.stateEnd = true;       //  если нет, устанавливаем флаг об окончании состояния
+            }
+        }
         ctx.drawImage(img, x, y, this.width, this.height);
     }
     
@@ -183,37 +261,37 @@ function Unit_module() {
     }
     
     Unit.prototype.doAction = function(action) {
-        let unit = this;
-        actionList[action].apply(null, arguments);  //  вызываем необходимое действие и передаем все аргументы
+        actionList[action].call(this);  //  вызываем необходимое действие и передаем все аргументы
+        //this.isAttacking = true;
     }
     
 
     //  действие - атака
-    function attack(action, unit, entities, mouseX, mouseY) {
-        
+    function attack() {
+        let unit = this;
         //  радиус поражения удара -- тестовое решение
-        let weaponRange = 0; //  TEST
-        let armRange = 40; //  TEST
-        let effectiveRange = weaponRange + armRange;    //  TEST
+        let effectiveRange = unit.weapon.range;    //  TEST
+        let resultDamage = unit.weapon.damage;
         
         //  определение, в какой сектор вокруг персонажа наносится удар
         let sector = 0;
-        if (mouseY >= unit.top && mouseY <= unit.bottom) {
-            sector = mouseX < unit.middleX ? 4 : 5;     //  секторы перед персонажем строго по горизонтали
+        if (unit.lookY >= unit.top && unit.lookY <= unit.bottom) {
+            sector = unit.lookX < unit.middleX ? 4 : 5;     //  секторы перед персонажем строго по горизонтали
         }
-        else if (mouseX >= unit.left && mouseX <= unit.right) {
-            sector = mouseY < unit.top ? 2 : 7;         //  секторы строго по вертикали
+        else if (unit.lookX >= unit.left && unit.lookX <= unit.right) {
+            sector = unit.lookY < unit.top ? 2 : 7;         //  секторы строго по вертикали
         }
-        else if (mouseX < unit.left) {
-            sector = mouseY < unit.top ? 1 : 6;         //  секторы слева от персонажа по диагонали
+        else if (unit.lookX < unit.left) {
+            sector = unit.lookY < unit.top ? 1 : 6;         //  секторы слева от персонажа по диагонали
         }
-        else if (mouseX > unit.right) {
-            sector = mouseY < unit.top ? 3 : 8;         //  секторы справа по диагонали
+        else if (unit.lookX > unit.right) {
+            sector = unit.lookY < unit.top ? 3 : 8;         //  секторы справа по диагонали
         }
-        //console.log(sector);
+        
+        let entities = g_tools.getEntities(unit);
         //  для каждого юнита, который находится в радиусе поражения, 
         entities.forEach(function(entity) {
-            if (tools.getDistance(unit, entity) <= effectiveRange) {    //  смотрим, находится ли он в секторе удара
+            if (g_tools.getDistance(unit, entity) <= effectiveRange) {    //  смотрим, находится ли он в секторе удара
                 
                 let presenceFlag = false;
                 //  в зависимости от сектора удара смотрим, находится ли цель в нем
@@ -266,7 +344,7 @@ function Unit_module() {
                 //  если юнит действительно находтся в секторе удара,
                 //  вызываем у пораженного юнита соотвествующее событие
                 if (presenceFlag) {
-                    entity.popEvent(action, entity, unit.stats.strength);    
+                    entity.popEvent('attack', entity, resultDamage);    
                 }
             }
         });
@@ -285,6 +363,10 @@ function Unit_module() {
     function getAttacked(action, unit, power) {
         
         unit.currentHP -= power;
+        
+        if (unit.currentHP < 0) {
+            unit.currentHP = 0;
+        }
         
         console.log('==================');
         console.log('unit id: ' + unit.unitId);

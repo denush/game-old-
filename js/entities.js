@@ -8,46 +8,43 @@ function entities_module() {
         all: []
     };
 
-    entities.init = function(storage, viewport) {
+    entities.init = function() {
 
-        this.hero = new Unit(storage.hero.x,
-                            storage.hero.y,
-                            storage.hero.width,
-                            storage.hero.height,
-                            storage.hero.width2,
-                            storage.hero.solid,
-                            storage.hero.type,
+        this.hero = new Unit(g_storage.hero.x,
+                            g_storage.hero.y,
+                            g_storage.unitTypes[g_storage.hero.type].width,
+                            g_storage.unitTypes[g_storage.hero.type].height,
+                            g_storage.unitTypes[g_storage.hero.type].width2,
+                            g_storage.unitTypes[g_storage.hero.type].solid,
+                            g_storage.hero.type,
                             9999);
 
         //this.units.push(this.hero);
 
-        storage.units.forEach(function(unit, i) {
+        g_storage.units.forEach(function(unit, i) {
             entities.units.push(new Unit(unit.x,
                                     unit.y,
-                                    storage.unitTypes[unit.type].width,
-                                    storage.unitTypes[unit.type].height,
-                                    storage.unitTypes[unit.type].width2,
-                                    storage.unitTypes[unit.type].solid,
+                                    g_storage.unitTypes[unit.type].width,
+                                    g_storage.unitTypes[unit.type].height,
+                                    g_storage.unitTypes[unit.type].width2,
+                                    g_storage.unitTypes[unit.type].solid,
                                     unit.type,
                                     i));
         });
 
-        storage.subjects.forEach(function(subject, i) {
+        g_storage.subjects.forEach(function(subject, i) {
             entities.subjects.push(new Subject(subject.x,
                                         subject.y,
-                                        storage.subjectTypes[subject.type].width,
-                                        storage.subjectTypes[subject.type].height,
-                                        storage.subjectTypes[subject.type].width2,
-                                        storage.subjectTypes[subject.type].solid,
+                                        g_storage.subjectTypes[subject.type].width,
+                                        g_storage.subjectTypes[subject.type].height,
+                                        g_storage.subjectTypes[subject.type].width2,
+                                        g_storage.subjectTypes[subject.type].solid,
                                         subject.type,
                                         i));
         });
 
         this.all.push(this.hero);
         this.all = this.all.concat(this.units, this.subjects);
-        this.all.forEach(function(entity) {
-            entity.initViewport(viewport);
-        });
     }
     
     entities.update = function() {
@@ -72,12 +69,12 @@ function entities_module() {
         });
     }
 
-    entities.draw = function(deltaX, deltaY, files) {
+    entities.draw = function(deltaX, deltaY) {
         this.all.sort(function(a, b) {
             return (a.y + a.height) - (b.y + b.height);
         });
         this.all.forEach(function(unit) {
-            unit.draw(deltaX, deltaY, files); 
+            unit.draw(deltaX, deltaY); 
         });
     }
     
